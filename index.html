@@ -151,39 +151,6 @@
             letter-spacing: 0.5px;
         }
         
-        .search-container {
-            margin-bottom: 30px;
-            padding: 20px;
-            background-color: var(--lightest-pink);
-            border-radius: 6px;
-            border: 1px solid var(--light-pink);
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--medium-grey);
-            border-radius: 4px;
-            font-size: 14px;
-            background-color: var(--white);
-            color: var(--dark-grey);
-            font-family: var(--code-font);
-            letter-spacing: 0.3px;
-            margin-bottom: 10px;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: var(--blush-pink);
-            box-shadow: 0 0 0 3px rgba(216, 102, 125, 0.15);
-        }
-        
-        .search-info {
-            font-size: 12px;
-            color: #718096;
-            font-family: var(--code-font);
-        }
-        
         .form-group {
             margin-bottom: 24px;
         }
@@ -279,10 +246,6 @@
         .entry-card:hover {
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
             transform: translateY(-2px);
-        }
-        
-        .entry-card.hidden {
-            display: none;
         }
         
         .entry-card h3 {
@@ -410,12 +373,6 @@
         <!-- Literature & Reading Section -->
         <section id="literature" class="section active">
             <h2>Literature & Reading Tracker</h2>
-            
-            <div class="search-container">
-                <input type="text" class="search-input" id="literature-search" placeholder="Search literature entries...">
-                <div class="search-info">Search by title, authors, source, notes, or tags</div>
-            </div>
-            
             <form id="literature-form">
                 <div class="form-group">
                     <label for="lit-title">Title</label>
@@ -456,12 +413,6 @@
         <!-- Alloy Compositions Section -->
         <section id="alloys" class="section">
             <h2>Alloy Compositions</h2>
-            
-            <div class="search-container">
-                <input type="text" class="search-input" id="alloy-search" placeholder="Search alloy compositions...">
-                <div class="search-info">Search by name, composition, processing parameters, or notes</div>
-            </div>
-            
             <form id="alloy-form">
                 <div class="form-group">
                     <label for="alloy-name">Alloy Name/ID</label>
@@ -498,12 +449,6 @@
         <!-- Test Results Section -->
         <section id="tests" class="section">
             <h2>Test Results</h2>
-            
-            <div class="search-container">
-                <input type="text" class="search-input" id="test-search" placeholder="Search test results...">
-                <div class="search-info">Search by test name, alloy, parameters, results, or notes</div>
-            </div>
-            
             <form id="test-form">
                 <div class="form-group">
                     <label for="test-name">Test Name/Type</label>
@@ -544,12 +489,6 @@
         <!-- Resources & Links Section -->
         <section id="resources" class="section">
             <h2>Resources & Links</h2>
-            
-            <div class="search-container">
-                <input type="text" class="search-input" id="resource-search" placeholder="Search resources...">
-                <div class="search-info">Search by name, description, or tags</div>
-            </div>
-            
             <form id="resource-form">
                 <div class="form-group">
                     <label for="resource-name">Resource Name</label>
@@ -592,76 +531,32 @@
     </footer>
 
     <script>
-        // Store data in memory (not using localStorage as per artifact restrictions)
-        let literatureData = [];
-        let alloyData = [];
-        let testData = [];
-        let resourceData = [];
+        // Store data in localStorage
+        let literatureData = JSON.parse(localStorage.getItem('literatureData')) || [];
+        let alloyData = JSON.parse(localStorage.getItem('alloyData')) || [];
+        let testData = JSON.parse(localStorage.getItem('testData')) || [];
+        let resourceData = JSON.parse(localStorage.getItem('resourceData')) || [];
         
         // Navigation functionality
+        // Define a function for the navigation click event
         function handleNavClick(item) {
+            // Update active nav item
             document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
             item.classList.add('active');
             
+            // Show corresponding section
             document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
             document.getElementById(item.dataset.section).classList.add('active');
         }
         
+        // Add click event listeners to nav items
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', function() {
                 handleNavClick(this);
             });
         });
         
-        // Fixed date formatting function
-        function formatDate(dateString) {
-            if (!dateString) return 'No date';
-            // Parse the date string and format it correctly to avoid timezone issues
-            const [year, month, day] = dateString.split('-');
-            const date = new Date(year, month - 1, day); // month is 0-indexed
-            return date.toLocaleDateString();
-        }
-        
-        // Search functionality
-        function setupSearch(inputId, containerId, filterFunction) {
-            const searchInput = document.getElementById(inputId);
-            searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                const container = document.getElementById(containerId);
-                const entries = container.querySelectorAll('.entry-card');
-                
-                entries.forEach(entry => {
-                    if (filterFunction(entry, searchTerm)) {
-                        entry.classList.remove('hidden');
-                    } else {
-                        entry.classList.add('hidden');
-                    }
-                });
-            });
-        }
-        
-        // Search filter functions
-        function literatureSearchFilter(entry, searchTerm) {
-            const text = entry.textContent.toLowerCase();
-            return text.includes(searchTerm);
-        }
-        
-        function alloySearchFilter(entry, searchTerm) {
-            const text = entry.textContent.toLowerCase();
-            return text.includes(searchTerm);
-        }
-        
-        function testSearchFilter(entry, searchTerm) {
-            const text = entry.textContent.toLowerCase();
-            return text.includes(searchTerm);
-        }
-        
-        function resourceSearchFilter(entry, searchTerm) {
-            const text = entry.textContent.toLowerCase();
-            return text.includes(searchTerm);
-        }
-        
-        // Ensure functions are available globally
+        // Ensure delete and edit functions are available globally
         window.deleteLiterature = deleteLiterature;
         window.deleteAlloy = deleteAlloy;
         window.deleteTest = deleteTest;
@@ -687,6 +582,7 @@
             };
             
             literatureData.push(entry);
+            localStorage.setItem('literatureData', JSON.stringify(literatureData));
             renderLiteratureEntries();
             this.reset();
         });
@@ -705,6 +601,7 @@
             };
             
             alloyData.push(entry);
+            localStorage.setItem('alloyData', JSON.stringify(alloyData));
             renderAlloyEntries();
             this.reset();
         });
@@ -724,6 +621,7 @@
             };
             
             testData.push(entry);
+            localStorage.setItem('testData', JSON.stringify(testData));
             renderTestEntries();
             this.reset();
         });
@@ -741,6 +639,7 @@
             };
             
             resourceData.push(entry);
+            localStorage.setItem('resourceData', JSON.stringify(resourceData));
             renderResourceEntries();
             this.reset();
         });
@@ -759,7 +658,7 @@
                 const card = document.createElement('div');
                 card.className = 'entry-card';
                 
-                const formattedDate = formatDate(entry.date);
+                const formattedDate = entry.date ? new Date(entry.date).toLocaleDateString() : 'No date';
                 
                 card.innerHTML = `
                     <h3>${entry.title}</h3>
@@ -781,9 +680,6 @@
                 
                 container.appendChild(card);
             });
-            
-            // Reset search
-            document.getElementById('literature-search').value = '';
         }
         
         function renderAlloyEntries() {
@@ -799,8 +695,13 @@
                 const card = document.createElement('div');
                 card.className = 'entry-card';
                 
-                const formattedDate = formatDate(entry.date);
-                
+                function formatDate(dateString) {
+                    if (!dateString) return 'No date';
+                    const [year, month, day] = dateString.split('-');
+                    const date = new Date(year, month - 1, day);
+                    return date.toLocaleDateString();
+                }
+                const formattedDate = formatDate(entry.date);                
                 card.innerHTML = `
                     <h3>${entry.name}</h3>
                     <div class="entry-meta">
@@ -818,9 +719,6 @@
                 
                 container.appendChild(card);
             });
-            
-            // Reset search
-            document.getElementById('alloy-search').value = '';
         }
         
         function renderTestEntries() {
@@ -836,7 +734,7 @@
                 const card = document.createElement('div');
                 card.className = 'entry-card';
                 
-                const formattedDate = formatDate(entry.date);
+                const formattedDate = entry.date ? new Date(entry.date).toLocaleDateString() : 'No date';
                 
                 card.innerHTML = `
                     <h3>${entry.name}</h3>
@@ -856,9 +754,6 @@
                 
                 container.appendChild(card);
             });
-            
-            // Reset search
-            document.getElementById('test-search').value = '';
         }
         
         function renderResourceEntries() {
@@ -895,15 +790,13 @@
                 
                 container.appendChild(card);
             });
-            
-            // Reset search
-            document.getElementById('resource-search').value = '';
         }
         
         // CRUD Operations
         function deleteLiterature(id) {
             if (confirm('Are you sure you want to delete this entry?')) {
                 literatureData = literatureData.filter(item => item.id !== id);
+                localStorage.setItem('literatureData', JSON.stringify(literatureData));
                 renderLiteratureEntries();
             }
         }
@@ -911,6 +804,7 @@
         function deleteAlloy(id) {
             if (confirm('Are you sure you want to delete this alloy?')) {
                 alloyData = alloyData.filter(item => item.id !== id);
+                localStorage.setItem('alloyData', JSON.stringify(alloyData));
                 renderAlloyEntries();
             }
         }
@@ -918,6 +812,7 @@
         function deleteTest(id) {
             if (confirm('Are you sure you want to delete this test result?')) {
                 testData = testData.filter(item => item.id !== id);
+                localStorage.setItem('testData', JSON.stringify(testData));
                 renderTestEntries();
             }
         }
@@ -925,6 +820,7 @@
         function deleteResource(id) {
             if (confirm('Are you sure you want to delete this resource?')) {
                 resourceData = resourceData.filter(item => item.id !== id);
+                localStorage.setItem('resourceData', JSON.stringify(resourceData));
                 renderResourceEntries();
             }
         }
@@ -943,6 +839,7 @@
             
             // Remove the entry and update display
             literatureData = literatureData.filter(item => item.id !== id);
+            localStorage.setItem('literatureData', JSON.stringify(literatureData));
             renderLiteratureEntries();
             
             // Scroll to form
@@ -962,6 +859,7 @@
             
             // Remove the entry and update display
             alloyData = alloyData.filter(item => item.id !== id);
+            localStorage.setItem('alloyData', JSON.stringify(alloyData));
             renderAlloyEntries();
             
             // Scroll to form
@@ -982,6 +880,7 @@
             
             // Remove the entry and update display
             testData = testData.filter(item => item.id !== id);
+            localStorage.setItem('testData', JSON.stringify(testData));
             renderTestEntries();
             
             // Scroll to form
@@ -1000,6 +899,7 @@
             
             // Remove the entry and update display
             resourceData = resourceData.filter(item => item.id !== id);
+            localStorage.setItem('resourceData', JSON.stringify(resourceData));
             renderResourceEntries();
             
             // Scroll to form
@@ -1007,21 +907,10 @@
         }
         
         // Initialize the app
-        function initializeApp() {
-            renderLiteratureEntries();
-            renderAlloyEntries();
-            renderTestEntries();
-            renderResourceEntries();
-            
-            // Setup search functionality
-            setupSearch('literature-search', 'literature-list', literatureSearchFilter);
-            setupSearch('alloy-search', 'alloy-list', alloySearchFilter);
-            setupSearch('test-search', 'test-list', testSearchFilter);
-            setupSearch('resource-search', 'resource-list', resourceSearchFilter);
-        }
-        
-        // Initialize when page loads
-        initializeApp();
+        renderLiteratureEntries();
+        renderAlloyEntries();
+        renderTestEntries();
+        renderResourceEntries();
     </script>
 </body>
 </html>
