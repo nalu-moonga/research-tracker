@@ -795,4 +795,233 @@
                 return;
             }
             
-            alloyData.sort((a, b)
+            alloyData.sort((a, b) => new Date(b.addedOn) - new Date(a.addedOn)).forEach(entry => {
+                const card = document.createElement('div');
+                card.className = 'entry-card';
+                
+                const formattedDate = formatDate(entry.date);
+                
+                card.innerHTML = `
+                    <h3>${entry.name}</h3>
+                    <div class="entry-meta">
+                        <strong>Date Created:</strong> ${formattedDate}
+                    </div>
+                    ${entry.composition ? `<p><strong>Composition:</strong> ${entry.composition}</p>` : ''}
+                    ${entry.processing ? `<p><strong>Processing Parameters:</strong> ${entry.processing}</p>` : ''}
+                    ${entry.notes ? `<p><strong>Notes:</strong> ${entry.notes}</p>` : ''}
+                    ${entry.dataLink ? `<p><strong>Raw Data:</strong> <a href="${entry.dataLink}" target="_blank">${entry.dataLink}</a></p>` : ''}
+                    <div class="entry-actions">
+                        <button class="btn-small" onclick="editAlloy(${entry.id})">Edit</button>
+                        <button class="btn-small" onclick="deleteAlloy(${entry.id})">Delete</button>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            // Reset search
+            document.getElementById('alloy-search').value = '';
+        }
+        
+        function renderTestEntries() {
+            const container = document.getElementById('test-list');
+            container.innerHTML = '';
+            
+            if (testData.length === 0) {
+                container.innerHTML = '<p>No test results yet. Add your first one above!</p>';
+                return;
+            }
+            
+            testData.sort((a, b) => new Date(b.addedOn) - new Date(a.addedOn)).forEach(entry => {
+                const card = document.createElement('div');
+                card.className = 'entry-card';
+                
+                const formattedDate = formatDate(entry.date);
+                
+                card.innerHTML = `
+                    <h3>${entry.name}</h3>
+                    <div class="entry-meta">
+                        <strong>Alloy:</strong> ${entry.alloy || 'Not specified'} | 
+                        <strong>Test Date:</strong> ${formattedDate}
+                    </div>
+                    ${entry.parameters ? `<p><strong>Parameters:</strong> ${entry.parameters}</p>` : ''}
+                    ${entry.results ? `<p><strong>Results:</strong> ${entry.results}</p>` : ''}
+                    ${entry.notes ? `<p><strong>Notes:</strong> ${entry.notes}</p>` : ''}
+                    ${entry.dataLink ? `<p><strong>Raw Data:</strong> <a href="${entry.dataLink}" target="_blank">${entry.dataLink}</a></p>` : ''}
+                    <div class="entry-actions">
+                        <button class="btn-small" onclick="editTest(${entry.id})">Edit</button>
+                        <button class="btn-small" onclick="deleteTest(${entry.id})">Delete</button>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            // Reset search
+            document.getElementById('test-search').value = '';
+        }
+        
+        function renderResourceEntries() {
+            const container = document.getElementById('resource-list');
+            container.innerHTML = '';
+            
+            if (resourceData.length === 0) {
+                container.innerHTML = '<p>No resources or links yet. Add your first one above!</p>';
+                return;
+            }
+            
+            resourceData.sort((a, b) => new Date(b.addedOn) - new Date(a.addedOn)).forEach(entry => {
+                const card = document.createElement('div');
+                card.className = 'entry-card';
+                
+                // Format the resource type for display
+                const resourceType = entry.type.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                
+                card.innerHTML = `
+                    <h3>${entry.name}</h3>
+                    <div class="entry-meta">
+                        <strong>Type:</strong> ${resourceType}
+                    </div>
+                    <p><strong>Link:</strong> <a href="${entry.link}" target="_blank">${entry.link}</a></p>
+                    ${entry.description ? `<p><strong>Description:</strong> ${entry.description}</p>` : ''}
+                    <div class="entry-tags">
+                        ${entry.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                    <div class="entry-actions">
+                        <button class="btn-small" onclick="editResource(${entry.id})">Edit</button>
+                        <button class="btn-small" onclick="deleteResource(${entry.id})">Delete</button>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            // Reset search
+            document.getElementById('resource-search').value = '';
+        }
+        
+        // CRUD Operations
+        function deleteLiterature(id) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                literatureData = literatureData.filter(item => item.id !== id);
+                renderLiteratureEntries();
+            }
+        }
+        
+        function deleteAlloy(id) {
+            if (confirm('Are you sure you want to delete this alloy?')) {
+                alloyData = alloyData.filter(item => item.id !== id);
+                renderAlloyEntries();
+            }
+        }
+        
+        function deleteTest(id) {
+            if (confirm('Are you sure you want to delete this test result?')) {
+                testData = testData.filter(item => item.id !== id);
+                renderTestEntries();
+            }
+        }
+        
+        function deleteResource(id) {
+            if (confirm('Are you sure you want to delete this resource?')) {
+                resourceData = resourceData.filter(item => item.id !== id);
+                renderResourceEntries();
+            }
+        }
+        
+        function editLiterature(id) {
+            const entry = literatureData.find(item => item.id === id);
+            if (!entry) return;
+            
+            document.getElementById('lit-title').value = entry.title;
+            document.getElementById('lit-authors').value = entry.authors;
+            document.getElementById('lit-source').value = entry.source;
+            document.getElementById('lit-date').value = entry.date;
+            document.getElementById('lit-link').value = entry.link;
+            document.getElementById('lit-notes').value = entry.notes;
+            document.getElementById('lit-tags').value = entry.tags.join(', ');
+            
+            // Remove the entry and update display
+            literatureData = literatureData.filter(item => item.id !== id);
+            renderLiteratureEntries();
+            
+            // Scroll to form
+            document.getElementById('literature-form').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function editAlloy(id) {
+            const entry = alloyData.find(item => item.id === id);
+            if (!entry) return;
+            
+            document.getElementById('alloy-name').value = entry.name;
+            document.getElementById('alloy-composition').value = entry.composition;
+            document.getElementById('alloy-processing').value = entry.processing;
+            document.getElementById('alloy-date').value = entry.date;
+            document.getElementById('alloy-notes').value = entry.notes;
+            document.getElementById('alloy-data-link').value = entry.dataLink;
+            
+            // Remove the entry and update display
+            alloyData = alloyData.filter(item => item.id !== id);
+            renderAlloyEntries();
+            
+            // Scroll to form
+            document.getElementById('alloy-form').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function editTest(id) {
+            const entry = testData.find(item => item.id === id);
+            if (!entry) return;
+            
+            document.getElementById('test-name').value = entry.name;
+            document.getElementById('test-alloy').value = entry.alloy;
+            document.getElementById('test-date').value = entry.date;
+            document.getElementById('test-parameters').value = entry.parameters;
+            document.getElementById('test-results').value = entry.results;
+            document.getElementById('test-data-link').value = entry.dataLink;
+            document.getElementById('test-notes').value = entry.notes;
+            
+            // Remove the entry and update display
+            testData = testData.filter(item => item.id !== id);
+            renderTestEntries();
+            
+            // Scroll to form
+            document.getElementById('test-form').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function editResource(id) {
+            const entry = resourceData.find(item => item.id === id);
+            if (!entry) return;
+            
+            document.getElementById('resource-name').value = entry.name;
+            document.getElementById('resource-type').value = entry.type;
+            document.getElementById('resource-link').value = entry.link;
+            document.getElementById('resource-description').value = entry.description;
+            document.getElementById('resource-tags').value = entry.tags.join(', ');
+            
+            // Remove the entry and update display
+            resourceData = resourceData.filter(item => item.id !== id);
+            renderResourceEntries();
+            
+            // Scroll to form
+            document.getElementById('resource-form').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Initialize the app
+        function initializeApp() {
+            renderLiteratureEntries();
+            renderAlloyEntries();
+            renderTestEntries();
+            renderResourceEntries();
+            
+            // Setup search functionality
+            setupSearch('literature-search', 'literature-list', literatureSearchFilter);
+            setupSearch('alloy-search', 'alloy-list', alloySearchFilter);
+            setupSearch('test-search', 'test-list', testSearchFilter);
+            setupSearch('resource-search', 'resource-list', resourceSearchFilter);
+        }
+        
+        // Initialize when page loads
+        initializeApp();
+    </script>
+</body>
+</html>
